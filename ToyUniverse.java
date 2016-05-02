@@ -1,3 +1,5 @@
+// Software developed for Toy Universe Shopping Mall
+
 import javax.swing.*;
 import java.awt.*;
 import java.applet.*;
