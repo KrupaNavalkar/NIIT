@@ -1,27 +1,43 @@
-// Software developed for Toy Universe Shopping Mall
-
 import javax.swing.*;
 import java.awt.*;
-import java.util.Date;
-import java.util.GregorianCalendar;
-import java.util.Calendar;
-
+import java.applet.*;
 import java.sql.*;
 import java.net.*;
 import java.awt.event.*;
 import java.io.*;
 import java.lang.*;
+import java.util.Date;
+import java.util.Calendar;
+import java.util.GregorianCalendar;
+
+
+class Registration extends Object implements Serializable
+{
+ String regShopperId, regPassword, regFirstName, regLastName, regAddress, regEmail, regCity, regState, regCountry, regCountryId, regCreditCardNo, regCreditCardType, regExpiryDate;
+}
+
+class Recipient extends Object implements Serializable
+{
+ String recpOrderNo, recpFirstName, recpLastName, recpAddress, recpCity, recpState, recpCountryCode, recpZipCode, recpPhone;
+}
+
+class OrderDetail extends Object implements Serializable
+{
+ String odOrderNo, odToyId, odQty, odGiftWrap, odWrapperId, odMessage, odToyCost;
+}
+	
 public class ToyUniverse extends JApplet implements Runnable
 {
 
- JTabbedPane tb;
-	JScrollPane sp;
+ 	JTabbedPane tb;
 	JPanel regPanel;
 	JPanel recpPanel;
 	JPanel odPanel;
+        JPanel welPanel;
 	GridBagLayout gb;
 	GridBagConstraints gbc;
 
+	ImageIcon logoImage,logoImage1,logoImage2;
 
 	Thread datimeThread;
 	Date date;
@@ -41,9 +57,10 @@ public class ToyUniverse extends JApplet implements Runnable
 	JLabel regCreditCardNo;
         JLabel regCreditCardType;
 	JLabel regExpiryDate;
+	JLabel regHeart;
         
         JButton submit;
-        
+        JButton reset;
 
         JTextField textregShopperId;
 	JPasswordField textregPassword;
@@ -72,12 +89,13 @@ public class ToyUniverse extends JApplet implements Runnable
 	JLabel recpAddress;
 	JLabel recpCity;
 	JLabel recpState;
-	JLabel recpCountryId;
+	JLabel recpCountryCode;
 	JLabel recpZipCode;
 	JLabel recpPhone;
-
-	JButton recpsubmit;
+	JLabel recpHeart;
 	
+	JButton recpsubmit;
+	JButton recpreset;
 
 	JTextField textrecpOrderNo;
 	JTextField textrecpFirstName;
@@ -85,7 +103,7 @@ public class ToyUniverse extends JApplet implements Runnable
 	JTextField textrecpAddress;
 	JTextField textrecpCity;
 	JTextField textrecpState;
-	JTextField textrecpCountryId;
+	JTextField textrecpCountryCode;
 	JTextField textrecpZipCode;
 	JTextField textrecpPhone;
 
@@ -94,18 +112,30 @@ public class ToyUniverse extends JApplet implements Runnable
 	JLabel odQty;
 	JLabel odGiftWrap;
 	JLabel odWrapperId;
+	JLabel odMessage;
 	JLabel odToyCost;
+        JLabel odHeart;
 
 	JTextField textodOrderNo;
 	JTextField textodToyId;
 	JTextField textodQty;
 	JComboBox comboodGiftWrap;
 	JTextField textodWrapperId;
+	JTextField textodMessage;
 	JTextField textodToyCost;
 
 	JButton odsubmit;
-	
-	
+	JButton odreset;
+
+	JLabel welMusicBox;
+	JLabel welHeartBlank;
+	JLabel welHeartBlank1;
+        JLabel welAnimation;
+
+	String welMessage[]={"Welcome","to the","World of Toys","Toy Universe"};
+	int counter;
+        Thread animationThread;
+
 	public void init()
 	{	
 		tb = new JTabbedPane();
@@ -118,29 +148,38 @@ public class ToyUniverse extends JApplet implements Runnable
 		recpPanel.setLayout(gb);
 		odPanel.setLayout(gb);
 		gbc.anchor = GridBagConstraints.NORTHWEST;
-
-		regPanel.setBackground(Color.pink);
-		regPanel.setForeground(Color.blue);
-		recpPanel.setBackground(Color.yellow);
-		recpPanel.setForeground(Color.blue);
-		odPanel.setBackground(Color.green);
-		odPanel.setForeground(Color.black);
+//change color
+		regPanel.setBackground(Color.red);
+		regPanel.setForeground(Color.black);
+		recpPanel.setBackground(Color.red);
+		recpPanel.setForeground(Color.black);
+		odPanel.setBackground(Color.black);
+		odPanel.setForeground(Color.red);
 		datimeThread = new Thread(this);
-		
-		
+
+
+
 		label1 = new JLabel("");
 		label2 = new JLabel("");
 		label3 = new JLabel("");
 		label4 = new JLabel("");
 		label5 = new JLabel("");
 		label6 = new JLabel("");
-
-
+   
 		date = new Date();
 		calendar = new GregorianCalendar();
 		datimeThread.start();
 
-
+		welAnimation = new JLabel("  ");
+  		Container content = getContentPane();
+		JPanel welPanel = new JPanel();
+		//welPanel.setLayout(new FlowLayout());
+		//welPanel.add(welAnimation);
+		welPanel.setBackground(Color.black);	
+		content.add(welPanel);
+		animationThread = new Thread(this);
+		animationThread.start();	
+		
         	regShopperId = new JLabel("SHOPPER ID");
 		regPassword = new JLabel("PASSWORD");
 		regFirstName = new JLabel("FIRST NAME");
@@ -156,9 +195,11 @@ public class ToyUniverse extends JApplet implements Runnable
 		regExpiryDate = new JLabel("EXPIRY DATE");
 
 		submit = new JButton("SUBMIT");
-validateAction v=new validateAction();
+		reset = new JButton("RESET");
+		validateAction v=new validateAction();
 		submit.addActionListener(v);
-
+		validateAction va=new validateAction();
+		reset.addActionListener(va);
 
 		textregShopperId = new JTextField(5);
 		textregPassword = new JPasswordField(7);
@@ -180,15 +221,16 @@ validateAction v=new validateAction();
 		recpAddress = new JLabel("ADDRESS");
 		recpCity = new JLabel("CITY");
 		recpState = new JLabel("STATE");
-		recpCountryId = new JLabel("COUNTRY ID");
+		recpCountryCode = new JLabel("COUNTRY CODE");
 		recpZipCode = new JLabel("ZIP CODE");
 		recpPhone = new JLabel("PHONE");
 		
 		recpsubmit = new JButton("SUBMIT");
-validateAction v1=new validateAction();
+		recpreset = new JButton("RESET");
+		validateAction v1=new validateAction();
 		recpsubmit.addActionListener(v1);
-	
-
+		validateAction v1a=new validateAction();
+		recpreset.addActionListener(v1a);
 
 		textrecpOrderNo = new JTextField(5);	
 		textrecpFirstName = new JTextField(15);
@@ -196,7 +238,7 @@ validateAction v1=new validateAction();
 		textrecpAddress = new JTextField(15);
 		textrecpCity = new JTextField(10);
 		textrecpState = new JTextField(10);
-		textrecpCountryId = new JTextField(5);
+		textrecpCountryCode = new JTextField(5);
 		textrecpZipCode = new JTextField(10);
 		textrecpPhone = new JTextField(10);
 
@@ -205,23 +247,65 @@ validateAction v1=new validateAction();
 		odQty = new JLabel("QUATITY");
 		odGiftWrap = new JLabel("GIFTWRAP");
 		odWrapperId = new JLabel("WRAPPER ID");
+		odMessage = new JLabel("MESSAGE");
 		odToyCost = new JLabel("TOY COST");
 
 		textodOrderNo = new JTextField(5);
 		textodToyId = new JTextField(5);
 		textodQty = new JTextField(5);
 		
- 
+
                 String wrap[] = {"YES","NO"};
 		comboodGiftWrap = new JComboBox(wrap);
 		textodWrapperId = new JTextField(5);
+		textodMessage = new JTextField(15);
 		textodToyCost = new JTextField(15);
 		
 		odsubmit = new JButton("SUBMIT");
-validateAction v2=new validateAction();
+               	odreset = new JButton("RESET");
+		validateAction v2=new validateAction();
 		odsubmit.addActionListener(v2);
+                validateAction v2a=new validateAction();
+		odreset.addActionListener(v2a);
 		
+		Icon logoImage = new ImageIcon("heart2.gif");
+		odHeart = new JLabel(logoImage);
+		recpHeart = new JLabel(logoImage);		
+		regHeart = new JLabel(logoImage);
+		
+		Icon logoImage1 = new ImageIcon("heartblank.gif");
+		Icon logoImage2 = new ImageIcon("musicbox.gif");
+		welMusicBox = new JLabel(logoImage2);
+		welHeartBlank = new JLabel(logoImage1);
+		welHeartBlank1 = new JLabel(logoImage1);
 
+//public void Welcome()
+	   // {    
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gb.setConstraints(welHeartBlank,gbc);
+		welPanel.add(welHeartBlank);
+
+		
+		gbc.gridx = GridBagConstraints.RELATIVE;
+		gbc.gridy = 1;
+		gb.setConstraints(welMusicBox,gbc);
+		welPanel.add(welMusicBox);
+				
+		gbc.gridx = GridBagConstraints.RELATIVE;
+		gbc.gridy = 0;
+		gb.setConstraints(welHeartBlank1,gbc);
+		welPanel.add(welHeartBlank1);
+
+		gbc.gridx = GridBagConstraints.RELATIVE;
+		gbc.gridy = 0;
+		gb.setConstraints(welAnimation,gbc);
+		welPanel.add(welAnimation);
+          //  }     
+
+
+//public void Registration()
+         //   {    
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gb.setConstraints(regShopperId,gbc);
@@ -357,7 +441,20 @@ validateAction v2=new validateAction();
 		gb.setConstraints(submit,gbc);
 		regPanel.add(submit);
 
-		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gb.setConstraints(regHeart,gbc);
+		regPanel.add(regHeart);
+
+
+		gbc.gridx = 5;
+		gbc.gridy = 43;
+		gb.setConstraints(reset,gbc);
+		regPanel.add(reset);
+
+          //  }                 
+//public void Recipient()
+        //    {    
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gb.setConstraints(recpOrderNo,gbc);
@@ -420,13 +517,13 @@ validateAction v2=new validateAction();
 
 		gbc.gridx = 1;
 		gbc.gridy = 20;
-		gb.setConstraints(recpCountryId,gbc);
-		recpPanel.add(recpCountryId);
+		gb.setConstraints(recpCountryCode,gbc);
+		recpPanel.add(recpCountryCode);
 
 		gbc.gridx = 3;
 		gbc.gridy = 20;
-		gb.setConstraints(textrecpCountryId,gbc);
-		recpPanel.add(textrecpCountryId);
+		gb.setConstraints(textrecpCountryCode,gbc);
+		recpPanel.add(textrecpCountryCode);
 
 		gbc.gridx = 1;
 		gbc.gridy = 23;
@@ -453,7 +550,16 @@ validateAction v2=new validateAction();
 		gb.setConstraints(recpsubmit,gbc);
 		recpPanel.add(recpsubmit);
 
-		
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gb.setConstraints(recpHeart,gbc);
+		recpPanel.add(recpHeart);
+
+		gbc.gridx = 5;
+		gbc.gridy = 29;
+		gb.setConstraints(recpreset,gbc);
+		recpPanel.add(recpreset);
+
 		gbc.gridx = 5;
 		gbc.gridy = 1;
 		gb.setConstraints(label1,gbc);
@@ -473,7 +579,10 @@ validateAction v2=new validateAction();
 		gbc.gridy = 3;
 		gb.setConstraints(label4,gbc);
 		recpPanel.add(label4);
+         //   }    
 
+//public void OrderDetail()
+      //      {    
 		gbc.gridx = 1;
 		gbc.gridy = 1;
 		gb.setConstraints(odOrderNo,gbc);
@@ -524,7 +633,16 @@ validateAction v2=new validateAction();
 		gb.setConstraints(textodWrapperId,gbc);
 		odPanel.add(textodWrapperId);		
 
-				
+		gbc.gridx = 1;
+		gbc.gridy = 16;
+		gb.setConstraints(odMessage,gbc);
+		odPanel.add(odMessage);		
+
+		gbc.gridx = 3;
+		gbc.gridy = 16;
+		gb.setConstraints(textodMessage,gbc);
+		odPanel.add(textodMessage);		
+		
 		gbc.gridx = 1;
 		gbc.gridy = 19;
 		gb.setConstraints(odToyCost,gbc);
@@ -540,7 +658,11 @@ validateAction v2=new validateAction();
 		gb.setConstraints(odsubmit,gbc);
 		odPanel.add(odsubmit);				
 
-		
+		gbc.gridx = 5;
+		gbc.gridy = 23;
+		gb.setConstraints(odreset,gbc);
+		odPanel.add(odreset);				
+
 		gbc.gridx = 5;
 		gbc.gridy = 1;
 		gb.setConstraints(label5,gbc);
@@ -550,58 +672,27 @@ validateAction v2=new validateAction();
 		gbc.gridy = 3;
 		gb.setConstraints(label6,gbc);
 		odPanel.add(label6);
-	
+
+		//gbc.anchor = GridBagConstraints.SOUTHEAST;
+		gbc.gridx = 0;
+		gbc.gridy = 0;
+		gb.setConstraints(odHeart,gbc);
+		odPanel.add(odHeart);
+          //  }    
+
+		tb.addTab("WELCOME",null,welPanel,"WELCOME TO TOY UNIVERSE");
 		tb.addTab("SHOPPER",null,regPanel,"ENTER YOUR DETAILS");
 		tb.addTab("RECIPIENT",null,recpPanel,"ENTER RECIPIENT DETAILS");
 		tb.addTab("ORDER DETAILS",null,odPanel,"ENTER YOUR ORDER DETAILS");
-
+		
 		getContentPane().add(tb);
 	}
 
-
-
-public void run()
-	{
-		while(datimeThread != null)
-		{
-			display();
-			try
-			{
-				datimeThread.sleep(1000);
-			}
-	 		catch(InterruptedException e)
-			{
-				showStatus("thread interrupted");
-			}
-		}
-	}
-
-public void display()
-	{
-		calendar.setTime(date);
-strTime=calendar.get(Calendar.HOUR)+":"+calendar.get(Calendar.MINUTE)+":"+calendar.get(Calendar.SECOND);
-
-String strDate1,strDate2;
-strDate1=calendar.get(Calendar.MONTH)+"/"+calendar.get(Calendar.DATE)+"/"+calendar.get(Calendar.YEAR);
-
- 		label1.setText(strTime);
-		label3.setText(strDate);
-		label2.setText(strTime);
-		label4.setText(strDate);
-	        label5.setText(strTime);
-		label6.setText(strDate);
-	
-	}
-
-
-
 class validateAction implements ActionListener
-{ 
+{
 public void actionPerformed(ActionEvent e)
 {
-	
-Object obj = e.getSource();
-
+	Object obj = e.getSource();
 		if(obj == submit)
 		{
 			String Id = textregShopperId.getText();
@@ -640,45 +731,49 @@ Object obj = e.getSource();
 				getAppletContext().showStatus("EXPIRY DATE CANNOT BE NULL");
 				return;
 			}
-		try
-			{
-			Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
-			Connection con;
-			//establish connection with data source
-			con=DriverManager.getConnection("jdbc:odbc:ToyUniverse","user1","");
-			//create the statement object
-			PreparedStatement stat=con.prepareStatement("insert into Shopper(cShopperId,cPassword,vFirstName,vLastName,vAddress,vEmailId ,cCity ,cState ,cCountry ,cCountryId ,cCreditCardNo ,cCreditCardType ,dExpiryDate)values(?,?,?,?,?,?,?,?,?,?,?,?,?)");
-			//fill the parameter values
-			stat.setString(1,textregShopperId.getText());
-			stat.setString(2,textregPassword.getText());
- 			//stat.setString(3,textConfirmPassword.getText());
- 			stat.setString(4,textregFirstName.getText());
- 			stat.setString(5,textregLastName.getText());
- 			stat.setString(6,textregAddress.getText());
- 			//stat.setString(7,textregPhone.getText());
- 			stat.setString(8,textregEmail.getText());
- 			stat.setString(12,textregCity.getText());
- 			stat.setString(11,textregState.getText());
-			stat.setString(9,textregCountry.getText());
- 			stat.setString(10,textregCountryId.getText());
- 			//stat.setString(13,textregZipcode.getText());	
- 			stat.setString(14,textregCreditCardNo.getText());
- 			stat.setString(15,textregCreditCardType.getText());
- 			stat.setString(16,textregExpiryDate.getText());
 
-			//insert the record into the statement
-			stat.executeUpdate();
-			}
-			catch(Exception exception)
-			{
-				System.out.println("ERROR ENCOUNTERED WHILE ENTERING DATA IN TOYUNIVERSE DATABASE"+exception);
-			}
+		if(obj == reset)	
+		{
+			textregShopperId.setText(" "); 
+			textregPassword.setText(" ");
+			textregFirstName.setText(" ");
+			textregLastName.setText(" ");
+			textregEmail.setText(" ");
+			textregAddress.setText(" ");
+			textregCity.setText(" ");
+			textregState.setText(" ");
+			textregCountryId.setText(" ");
+			textregCreditCardNo.setText(" ");
+			textregCreditCardType.setText(" ");
+			textregExpiryDate.setText(" ");
 		}
-
-		
-
-
-	
+		try
+		{
+		Socket s = new Socket("192.168.16.2",2020);
+		ObjectOutputStream oos = new ObjectOutputStream(s.getOutputStream());
+		Registration r = new Registration();
+		r.regShopperId=textregShopperId.getText();
+		r.regPassword=textregPassword.getText();
+		r.regFirstName=textregFirstName.getText();
+		r.regLastName=textregLastName.getText();
+		r.regAddress=textregAddress.getText();
+		r.regEmail=textregEmail.getText();
+		r.regCity=textregCity.getText();
+		r.regState=textregState.getText();
+		r.regCountry=textregCountry.getText();
+		r.regCountryId=textregCountryId.getText();
+		r.regCreditCardNo=textregCreditCardNo.getText();
+		r.regCreditCardType=textregCreditCardType.getText();
+		r.regExpiryDate=textregExpiryDate.getText();
+		oos.writeObject((Registration)r);
+		oos.close();
+System.out.println("Registration detais sent");
+		}
+		catch(Exception e1)
+		{
+		showStatus("ERROR SENDING DATA");
+		}
+}
 		if(obj == recpsubmit)
 		{
 			String order = textrecpOrderNo.getText();
@@ -717,7 +812,7 @@ Object obj = e.getSource();
 				getAppletContext().showStatus("STATE CANNOT BE NULL");
 				return;
 			}
-			String country = textrecpCountryId.getText();
+			String country = textrecpCountryCode.getText();
 			if(country.length() == 0)
 			{
 				getAppletContext().showStatus("COUNTRY ID CANNOT BE NULL");
@@ -730,48 +825,56 @@ Object obj = e.getSource();
 				return;
 			}
 
-				String phone = textrecpPhone.getText();
+		
+			String phone = textrecpPhone.getText();
 			if(phone.length() == 0)
 			{
 				getAppletContext().showStatus("PHONE CANNOT BE NULL");
 				return;
 			}
-	else
+		if(obj == recpreset)
+		{
+			textrecpOrderNo.setText(" ");
+			textrecpFirstName.setText(" ");
+			textrecpLastName.setText(" ");
+			textrecpAddress.setText(" ");
+			textrecpCity.setText(" ");
+			textrecpState.setText(" ");
+			textrecpCountryCode.setText(" ");
+			textrecpZipCode.setText(" ");
+			textrecpPhone.setText(" ");			
+		}
+
+else
 			{
 				getAppletContext().showStatus("");
 
-			try
+			 try
 			{
-			Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
-			Connection con;
-			//establish connection with data source
-			con=DriverManager.getConnection("jdbc:odbc:ToyUniverse","user1","");
-			//create the statement object
-			PreparedStatement stat=con.prepareStatement("insert into Recipient(cOrderNo,vFirstName,vLastName,vAddress,cCity,cState,cCountryId,cZipcode,cPhone) values(?,?,?,?,?,?,?,?,?)");
-			//fill the parameter values
-			stat.setString(1,textrecpOrderNo.getText());
-			stat.setString(2,textrecpFirstName.getText());
- 			stat.setString(3,textrecpLastName.getText());
- 			stat.setString(4,textrecpAddress.getText());
- 			stat.setString(5,textrecpCity.getText());
- 			stat.setString(6,textrecpState.getText());
- 			//stat.setString(7,textrecpCountry.getText());
- 			stat.setString(8,textrecpCountryId.getText());
- 			stat.setString(9,textrecpZipCode.getText());
- 			stat.setString(10,textrecpPhone.getText());
-			
-			//insert the record into the table
-			stat.executeUpdate();
+			Socket s = new Socket("192.168.16.2",2020);
+			ObjectOutputStream oos0 = new ObjectOutputStream(s.getOutputStream());
+			Recipient r1 = new Recipient();
+			r1.recpOrderNo=textrecpOrderNo.getText();
+			r1.recpFirstName=textrecpFirstName.getText();
+			r1.recpLastName=textrecpLastName.getText();
+			r1.recpAddress=textrecpAddress.getText();
+			r1.recpCity=textrecpCity.getText();
+			r1.recpState=textrecpState.getText();
+			r1.recpCountryCode=textrecpCountryCode.getText();
+			r1.recpZipCode=textrecpZipCode.getText();
+			r1.recpPhone=textrecpPhone.getText();
+			oos0.writeObject((Recipient)r1);
+			oos0.close();
+System.out.println("Recipient data Sent");
+
 			}
-			catch(Exception exception)
+			catch(Exception e1)
 			{
-				System.out.println("ERROR ENCOUNTERED WHILE ENTERING DATA IN THE DATABASE"+exception);
+			showStatus("ERROR SENDING DATA TO THE DATA BASE");
 			}
 
-		}
-
-
-}
+}//else
+}//if
 		
 
 	if(obj == odsubmit)
@@ -800,40 +903,114 @@ Object obj = e.getSource();
 				getAppletContext().showStatus("TOY COST CANNOT BE NULL");
 				return;	
 			}
+
+		if(obj == odreset)
+		{
+			textodOrderNo.setText(" ");
+			textodToyId.setText(" ");
+			textodQty.setText(" ");
+			textodWrapperId.setText(" ");
+			textodMessage.setText(" ");
+			textodToyCost.setText(" ");			
+		}
 else
 {
 
-		try
-			{
-			Class.forName("sun.jdbc.odbc.JdbcOdbcDriver");
-			Connection con;
-			//establish connection with data source
-			con=DriverManager.getConnection("jdbc:odbc:ToyUniverse","user1","");
-			//create the statement object
-			PreparedStatement stat=con.prepareStatement("insert into OrderDetail(cOrderNo,cToyId,siQty,cGiftWrap,cWrapperId,mToyCost) values(?,?,?,?,?,?)");
-			//fill the parameter values
-			stat.setString(1,textodOrderNo.getText());
-			stat.setString(2,textodToyId.getText());
- 			stat.setString(3,textodQty.getText());
- 			stat.setString(4,(String)comboodGiftWrap.getSelectedItem());
- 			stat.setString(5,textodWrapperId.getText());
- 			stat.setString(6,textodToyCost.getText());
- 			
-			
-			//insert the record into the table
-			stat.executeUpdate();
-			}
-			catch(Exception exception)
-			{
-				System.out.println("ERROR ENCOUNTERED WHILE ENTERING DATA IN THE DATABASE"+exception);
-			}
+			try
+		{
+		Socket s = new Socket("192.168.16.2",2020);
+		ObjectOutputStream oos1 = new ObjectOutputStream(s.getOutputStream());
+		OrderDetail r2 = new OrderDetail();
+		r2.odOrderNo=textodOrderNo.getText();
+		r2.odToyId=textodToyId.getText();
+		r2.odQty=textodQty.getText();
+		r2.odGiftWrap=(String)comboodGiftWrap.getSelectedItem();	
+		r2.odWrapperId=textodWrapperId.getText();
+		r2.odToyCost=textodToyCost.getText();
+		r2.odMessage=textodMessage.getText();
+		oos1.writeObject((OrderDetail)r2);
+		oos1.close();
+System.out.println("Order Details Sent to the Server");
+		}
+		catch(Exception e1)
+		{
+		showStatus("ERROR SENDING DATA");
+		}
 
+}//else
+}
+}//act
+}//val
 
-		
+public void run()
+	{
+		while(datimeThread != null)
+		{
+			display();
+			try
+			{
+				datimeThread.sleep(1000);
+			}
+	 		catch(InterruptedException e)
+			{
+				showStatus("thread interrupted");
+			}
+		}
+		for(;;)
+ 		{
+			displayWelcome();
+			try
+			{
+				animationThread.sleep(1000);
+			}	
+			catch(InterruptedException e)
+			{
+				showStatus("thread interrupted");
+			}
+		}
+	
 	}
 
-}
+public void display()
+	{
+		date= new Date();
+		calendar = new GregorianCalendar();
+		calendar.setTime(date);
+		strTime = calendar.get(Calendar.HOUR)+":"+calendar.get(Calendar.MINUTE)+":"+calendar.get(Calendar.SECOND);
+		strDate = calendar.get(Calendar.MONTH)+"/"+calendar.get(Calendar.DATE)+"/"+calendar.get(Calendar.YEAR);
+		strStatus = strTime;
+		strStatus1 = strDate;
+ 		label1.setText(strStatus);
+		label3.setText(strStatus1);
+		label2.setText(strStatus);
+		label4.setText(strStatus1);
+		label5.setText(strStatus);
+		label6.setText(strStatus1);
+	
+	}
+
+public void displayWelcome()
+        {
+		
+		
+		Font font = new Font("Times Roman", Font.BOLD,12);
+ 		welAnimation.setFont(font);
+		welAnimation.setText(welMessage[counter]);       
+		counter++;
+		if(counter>=4)
+		{
+			counter=0;
+		}	
+		
+	}
+public void paint(Graphics g)
+{
+
+ Font myFont = new Font("SuperFrench", Font.BOLD + Font.ITALIC,14);
+ g.setFont(myFont);	
+ g.drawString("Welcome to Toy Universe - The World of Toys",100,100);
 
 }
-}
+
+
 }
